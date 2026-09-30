@@ -1,5 +1,7 @@
 # SAFEHELP AI - Frontend
 
+> 🌐 **Live Deployment**: [https://safehelp-ai-frontend.vercel.app/](https://safehelp-ai-frontend.vercel.app/)
+
 ## Overview
 Accessible, high-performance emergency assistance interface built with **React**, **Vite**, **Tailwind CSS**, and **Lucide Icons**.
 
