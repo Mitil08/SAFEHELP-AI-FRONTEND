@@ -1,14 +1,34 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://safehelp-ai-backend.onrender.com/api';
+// Dynamically determine the correct API Base URL
+export const getApiBaseUrl = () => {
+  // If in browser and deployed (e.g. Vercel, mobile, any remote domain)
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://safehelp-ai-backend.onrender.com/api';
+    }
+  }
+
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+
+  // Local fallback
+  return envUrl || 'https://safehelp-ai-backend.onrender.com/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 60000,
 });
 
-// Attach JWT token to requests if available
+// Attach dynamic baseURL and JWT token to all requests
 api.interceptors.request.use((config) => {
+  config.baseURL = getApiBaseUrl();
   const token = localStorage.getItem('safehelp_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
