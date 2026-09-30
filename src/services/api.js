@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://safehelp-ai-b
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 30000,
+  timeout: 60000,
 });
 
 // Attach JWT token to requests if available
@@ -15,6 +15,23 @@ api.interceptors.request.use((config) => {
   }
   return config;
 }, (error) => Promise.reject(error));
+
+// Graceful interceptor for Render cold starts or network reconnects
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.code === 'ECONNABORTED' || error.message === 'Network Error' || !error.response) {
+      const friendlyError = new Error('Server connection taking longer than expected.');
+      friendlyError.response = {
+        data: {
+          message: 'The cloud server is warming up or network is slow. Please retry in a few seconds.'
+        }
+      };
+      return Promise.reject(friendlyError);
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Auth Endpoints
 export const authApi = {
